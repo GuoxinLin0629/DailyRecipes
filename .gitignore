@@ -1,5 +1,9 @@
 venv/
+gh_assest/
+__pycache__/
+utils/
 spoonacularAPI_Key.txt
+bot.py
 bot_1.py
 bot_2.py
 bot_3.py
@@ -7,8 +11,6 @@ bot_4.py
 bot_5.py
 bot_6.py
 bot_7.py
-__pycache__/
-bot.py
 
 
 

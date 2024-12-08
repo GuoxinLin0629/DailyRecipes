@@ -7,12 +7,12 @@ bot = RecipeBot()
 
 @app.route('/')
 def home():
-    # """渲染主页"""
+    
     return render_template('index.html')
 
 @app.route('/get_recipe', methods=['POST'])
 def get_recipe():
-    #"""处理获取菜谱的 API 请求"""
+    
     try:
         user_input = request.json.get('query')
         if not user_input:
@@ -36,7 +36,7 @@ def get_recipe():
                 args.get('maxTime')
             )
             if recipes:
-                # 处理每个菜谱的数据
+                
                 recipe_data = []
                 for recipe in recipes:
                     recipe_info = {

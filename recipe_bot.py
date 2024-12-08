@@ -131,7 +131,7 @@ class RecipeBot:
                     float(nutrition_data.get('carbs', '0').rstrip('g'))
                 ]
             }
-            return nutrients  # 返回数据而不是显示图表
+            return nutrients  
         except Exception as e:
             print(f"Error processing nutrition data: {e}")
             return None

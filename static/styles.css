@@ -1,42 +1,177 @@
+/* General styles */
 body {
-    font-family: Arial, sans-serif;
+    font-family: 'Courier Prime', monospace;
     line-height: 1.6;
-    margin: 0;
-    padding: 0;
-    background-color: #f4f4f4;
+    background: rgb(243,224,255);
+    background: linear-gradient(90deg, rgba(243,224,255,1) 0%, rgba(250,255,195,1) 36%, rgba(189,234,224,1) 100%);
 }
 
-header {
-    background: #333;
-    color: white;
-    padding: 10px;
-    text-align: center;
+/* Navigation styles */
+nav {
+    text-align: center; 
+    padding: 5px 0; 
 }
 
-nav a {
-    color: white;
-    margin: 0 15px;
-    text-decoration: none;
+nav h1 {
+    font-family: 'Star-Crossed Lovers', cursive; 
+    font-size: 3.5em;
+    color: #333; 
+    padding: 0.5em 0.5em;
+    
 }
 
-main {
+/* Content area */
+.content {
+    max-width: 90%;
+    margin: 0 auto;
     padding: 20px;
 }
 
-footer {
-    background: #333;
-    color: white;
-    text-align: center;
+/* Search area */
+.search-container {
+    text-align: center; 
+    margin: 1rem 0;
     padding: 10px;
+}
+
+.search-container h2 {
+    font-family: 'Courier Prime', monospace;
+    font-size: 1.5em;
+    color: #333;
+    margin-bottom: 10;
+    display: inline-block;
+    padding: 0.8em 1em;
+    
+}
+
+.input-group {
+    display: flex;
+    justify-content: center; 
+    gap: 15px;
+    margin: 0.5rem;
+}
+
+/* Recipe cards */
+.recipes-container {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center; 
+    gap: 40px;
+    padding: 20px;
+}
+
+.recipe-card {
+    background: white;
+    font-family: 'Courier Prime', monospace;
+    padding: 40px;
+    border-radius: 2px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    box-sizing: border-box;
+    margin-bottom: 30px;
+}
+
+.recipe-card img {
+    max-width: 50%;
+    display: block;
+    justify-content: center;
+    margin: 40px;
+    border: 4px solid #333;
+    border-radius: 10px;
+}
+
+
+@media (max-width: 768px) {
+    .recipes-container {
+        flex-direction: column; 
+    }
+    .recipe-card {
+        flex-basis: 70%; 
+    }
+}
+
+@font-face {
+    font-family: 'Star-Crossed Lovers';
+    src: url('../fonts/star-crossed-lovers-font.ttf') format('truetype'); /* 请将路径替换为你的字体文件路径 */
+    font-weight: normal;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'Courier Prime';
+    src: url('../fonts/Courier_Prime/CourierPrime-Regular.ttf') format('truetype'); /* 常规字体 */
+    font-weight: normal;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'Courier Prime';
+    src: url('../fonts/Courier_Prime/CourierPrime-Bold.ttf') format('truetype'); /* 粗体 */
+    font-weight: bold;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'Courier Prime';
+    src: url('../fonts/Courier_Prime/CourierPrime-Italic.ttf') format('truetype'); /* 斜体 */
+    font-weight: normal;
+    font-style: italic;
+}
+
+@font-face {
+    font-family: 'Courier Prime';
+    src: url('../fonts/Courier_Prime/CourierPrime-BoldItalic.ttf') format('truetype'); /* 粗斜体 */
+    font-weight: bold;
+    font-style: italic;
+}
+
+
+
+.loading {
+    display: none;
     position: fixed;
-    bottom: 0;
+    top: 0;
+    left: 0;
     width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 9999;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.loading span {
+    background-color: white;
+    padding: 20px 30px;
+    border-radius: 8px;
+    font-size: 1.2em;
+    color: #333;
+}
+
+.tagline-container {
+    display: flex; 
+    justify-content: center; 
+    margin-top: 20px;
+}
+
+.taglines {
+    text-align: left;
+}
+
+.tagline {
+    font-style: italic;
+    color: #6c757d;
+    margin-bottom: 5px;
+    display: flex;
+    align-items: center;
 }
 
 button {
-    background: #333;
-    color: white;
-    padding: 10px 20px;
-    border: none;
-    cursor: pointer;
-}
+width: 20px;          
+height: 20px;         
+border-radius: 50%;  
+background-color: black; 
+border: none;         
+cursor: pointer;      
+outline: none;        

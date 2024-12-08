@@ -1,90 +1,156 @@
-#Base Template (base.html)
-
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="/static/styles.css">
-    <title>Daily Recipe</title>
+    <title>Daily Recipes</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
-    <header>
-        <h1>Daily Recipe</h1>
-        <nav>
-            <a href="/">Home</a>
-        </nav>
-    </header>
-    <main>
-        {% block content %}{% endblock %}
-    </main>
-    <footer>
-        <p>&copy;Daily Recipe</p>
-    </footer>
+    <nav>
+        <h1>Daily Recipes</h1>
+    </nav>
+
+    <div class="content">
+        <div class="search-container">
+            <h2>Search recipes by ingredients</h2>
+            <div class="input-group">
+                <input type="text" id="query" placeholder="(✪ ͜⊃✪)">
+                <button onclick="getRecipe()">S</button>
+            </div>
+        </div>
+
+        <div id="loading" class="loading" style="display: none;">
+            Searching for recipes...
+        </div>
+
+        <div id="recipes-container"></div>
+    </div>
+
+    <script>
+        function getRecipe() {
+            const query = document.getElementById('query').value;
+            if (!query) return;
+
+            const loading = document.getElementById('loading');
+            const recipesContainer = document.getElementById('recipes-container');
+            loading.style.display = 'block';
+            recipesContainer.innerHTML = '';
+
+            fetch('/get_recipe', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ query: query })
+            })
+            .then(response => response.json())
+            .then(data => {
+                loading.style.display = 'none';
+                if (data.success && data.recipes) {
+                    displayRecipes(data.recipes);
+                } else {
+                    recipesContainer.innerHTML = data.message || 'Error finding recipes';
+                }
+            })
+            .catch(error => {
+                loading.style.display = 'none';
+                recipesContainer.innerHTML = 'Error: ' + error;
+            });
+        }
+
+        function displayRecipes(recipes) {
+            const container = document.getElementById('recipes-container');
+            
+            recipes.forEach((recipe, index) => {
+                const recipeDiv = document.createElement('div');
+                recipeDiv.className = 'recipe-card';
+
+                let html = `
+                    <h2>${recipe.title}</h2>
+                    <p><span style="font-size: 1em;">⏰</span> Preparation Time: ${recipe.readyMinutes} minutes</p>
+                `;
+
+                if (recipe.image) {
+                    html += `
+                        <div class="image-container">
+                            <img src="${recipe.image}" alt="${recipe.title}">
+                        </div>
+                    `;
+                }
+
+                html += `
+                    <h3 class="section-title">🥘 Ingredients:</h3>
+                    <ul>
+                        ${recipe.ingredients.map(ing => `<li>${ing.amount} ${ing.unit} ${ing.name}</li>`).join('')}
+                    </ul>
+                    <h3 class="section-title">📝 Instructions:</h3>
+                    <ol>
+                        ${recipe.instructions.map(step => `<li>${step}</li>`).join('')}
+                    </ol>
+                `;
+
+                if (recipe.video) {
+                    html += `
+                        <h3 class="section-title">🎥 Tutorial Video</h3>
+                        <p><a href="${recipe.video}" target="_blank">Watch Tutorial Video</a></p>
+                    `;
+                }
+
+                if (recipe.nutrition) {
+                    html += `
+                        <h3 class="section-title">📊 Nutritional Information</h3>
+                        <div class="nutrition-section">
+                            <canvas id="nutritionChart${index}"></canvas>
+                        </div>
+                    `;
+                }
+
+                recipeDiv.innerHTML = html;
+                container.appendChild(recipeDiv);
+
+                if (recipe.nutrition) {
+                    const canvas = document.getElementById(`nutritionChart${index}`);
+                    if (canvas) {
+                        const ctx = canvas.getContext('2d');
+                        new Chart(ctx, {
+                            type: 'bar',
+                            data: {
+                                labels: ['Calories', 'Protein', 'Fat', 'Carbs'],
+                                datasets: [{
+                                    label: 'Amount',
+                                    data: [
+                                        parseFloat(recipe.nutrition.calories),
+                                        parseFloat(recipe.nutrition.protein),
+                                        parseFloat(recipe.nutrition.fat),
+                                        parseFloat(recipe.nutrition.carbs)
+                                    ],
+                                    backgroundColor: [
+                                        'rgba(255, 99, 132, 0.5)',
+                                        'rgba(54, 162, 235, 0.5)',
+                                        'rgba(255, 206, 86, 0.5)',
+                                        'rgba(75, 192, 192, 0.5)'
+                                    ]
+                                }]
+                            },
+                            options: {
+                                responsive: true,
+                                scales: {
+                                    y: {
+                                        beginAtZero: true
+                                    }
+                                }
+                            }
+                        });
+                    }
+                }
+            });
+        }
+
+        document.getElementById('query').addEventListener('keypress', function (e) {
+            if (e.key === 'Enter') {
+                getRecipe();
+            }
+        });
+    </script>
 </body>
 </html>
-
-#Home Template (home.html)
-
-<h2>Find Recipes by Ingredients</h2>
-<form method="POST" action="/recipes">
-    <input type="text" name="ingredients" placeholder="e.g., potatoes, chicken" required>
-    <button type="submit">Search</button>
-</form>
-
-{% if recipes %}
-<ul>
-    {% for recipe in recipes %}
-    <li>
-        <a href="/recipe/{{ recipe.id }}">{{ recipe.title }}</a>
-    </li>
-    {% endfor %}
-</ul>
-{% endif %}
-{% endblock %}
-
-#Recipe Template (recipe.html)
-
-{% extends "base.html" %}
-
-<h2>{{ details.title }}</h2>
-<img src="{{ details.image }}" alt="{{ details.title }}">
-<p>{{ details.description }}</p>
-
-<h3>Ingredients</h3>
-<ul>
-    {% for ingredient in details.ingredients %}
-    <li>{{ ingredient }}</li>
-    {% endfor %}
-</ul>
-
-<h3>Instructions</h3>
-<p>{{ instructions }}</p>
-<a href="/analysis/{{ details.id }}">View Nutritional Analysis</a>
-{% endblock %}
-
-#Nutritional Analysis Template (analysis.html)
-{% extends "base.html" %}
-
-<h2>Nutritional Analysis for {{ recipe_title }}</h2>
-<img src="{{ chart_url }}" alt="Nutritional Analysis Chart">
-
-<table>
-    <thead>
-        <tr>
-            <th>Nutrient</th>
-            <th>Amount</th>
-            <th>% Daily Value</th>
-        </tr>
-    </thead>
-    <tbody>
-        {% for nutrient, data in nutrients.items() %}
-        <tr>
-            <td>{{ nutrient }}</td>
-            <td>{{ data.amount }}</td>
-            <td>{{ data.percent_daily_value }}%</td>
-        </tr>
-        {% endfor %}
-    </tbody>
-</table>
-{% endblock %}

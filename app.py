@@ -1,27 +1,60 @@
-from flask import Flask, render_template, request
-from utils.spoonacular import get_recipes, get_recipe_details,generate_instructions, generate_image
-import pandas as pd
+from flask import Flask, request, jsonify, render_template
+from recipe_bot import RecipeBot
+import json
 
 app = Flask(__name__)
+bot = RecipeBot()
+
 @app.route('/')
 def home():
+    # """渲染主页"""
     return render_template('index.html')
 
+@app.route('/get_recipe', methods=['POST'])
+def get_recipe():
+    #"""处理获取菜谱的 API 请求"""
+    try:
+        user_input = request.json.get('query')
+        if not user_input:
+            return jsonify({"error": "No query provided"}), 400
 
-def fetch_recipes():
-    ingredients = request.form['ingredients']
-    recipes = get_recipes(ingredients)
-    return render_template('index.html', recipes=recipes)
+        response = bot.client.chat.completions.create(
+            model="GPT-4",
+            messages=[
+                {"role": "system", "content": "Extract recipe search parameters from user input."},
+                {"role": "user", "content": user_input}
+            ],
+            tools=bot.functions,
+            tool_choice="auto"
+        )
 
+        if response.choices[0].message.tool_calls:
+            args = json.loads(response.choices[0].message.tool_calls[0].function.arguments)
+            recipes = bot.get_recipe(
+                args.get('ingredients'),
+                args.get('diet'),
+                args.get('maxTime')
+            )
+            if recipes:
+                # 处理每个菜谱的数据
+                recipe_data = []
+                for recipe in recipes:
+                    recipe_info = {
+                        'title': recipe['title'],
+                        'id': recipe['id'],
+                        'readyMinutes': recipe.get('readyMinutes'),
+                        'image': recipe.get('image'),
+                        'ingredients': recipe.get('ingredients', []),
+                        'instructions': recipe.get('instructions', []),
+                        'video': recipe.get('video'),
+                        'nutrition': recipe.get('nutrition')
+                    }
+                    recipe_data.append(recipe_info)
+                return jsonify({"success": True, "recipes": recipe_data})
+            return jsonify({"success": False, "message": "No recipes found."})
+        return jsonify({"success": False, "message": "Could not understand request."})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
-def recipe_details(id):
-    details = get_recipe_details(id)
-    instructions = generate_instructions(details)
-    return render_template('index.html', details=details, instructions=instructions)
-
-def nutritional_analysis(id):
-    details = get_recipe_details(id)
-    nutrients = pd.DataFrame(details['nutrition'])
-    # Example Pandas processing
-    nutrients['Percent Daily Value'] = (nutrients['amount'] / nutrients['dailyValue']) * 100
-    return render_template('index.html', nutrients=nutrients.to_dict())
+if __name__ == '__main__':
+    app.run(debug=True)

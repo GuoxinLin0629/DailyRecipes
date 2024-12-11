@@ -130,15 +130,3 @@ This project is licensed under the **MIT License**.
 
 ------
 
-## Additional Suggestions
-
-1. Include screenshots or a demo video to showcase the application.
-
-2. Expand on the contributing section with more detailed guidelines if necessary.
-
-3. Document any additional APIs or services used in the project.
-
-   
-
-------
-
